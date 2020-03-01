@@ -10,25 +10,19 @@ library(ggthemes)
 library(gifski)
 library(av)
 
-data(coronavirus)
-coronavirus %>%filter(type == "confirmed") %>%group_by(Country.Region) %>%summarise(total = sum(cases)) %>%arrange(-total) %>%head(20)
 
+# load data from Johns Hopkins github
 
 confirmedCases= read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')
 deathCases= read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv')
 recoveredCases= read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv')
 
 
+# set system locale for date conversion purpose
 Sys.setlocale("LC_TIME", "English")
 
 
-
-
-
-switzerlandConfirmed<-confirmedCases%>% select(-c(Lat,Long,'Province/State'))%>%filter(`Country/Region`=='Switzerland')
-switzerlandDeath<-deathCases%>% filter(`Country/Region`=='Switzerland')
-switzerlandrecovered<-recoveredCases%>% filter(`Country/Region`=='Switzerland')
-switzerlandConfirmed<-melt(switzerlandConfirmed, id='Country/Region')
+#convert data sets into columns and remove unwanted columns
 
 confirmedCases<-confirmedCases%>%select(-c(Lat,Long))%>%melt(id=c('Country/Region','Province/State'))
 confirmedCases<-confirmedCases%>%group_by(`Country/Region`,variable)%>%summarise(Confirmed=sum(value))
@@ -39,35 +33,33 @@ deathCases<-deathCases%>%group_by(`Country/Region`,variable)%>%summarise(Deaths=
 recoveredCases<-recoveredCases%>%select(-c(Lat,Long))%>%melt(id=c('Country/Region','Province/State'))
 recoveredCases<-recoveredCases%>%group_by(`Country/Region`,variable)%>%summarise(Recovered=sum(value))
 
+
+# rename table columns
 colnames(confirmedCases)<-c("Country","Date","Confirmed")
 colnames(deathCases)<-c("Country","Date","Death")
 colnames(recoveredCases)<-c("Country","Date","Recovered")
 
+# merge all atbles together
+
 mergedCases<-merge(confirmedCases,deathCases, by.y=c("Country","Date"))
 mergedCases<-merge(mergedCases,recoveredCases, by.y=c("Country","Date"))
 
+# convert factors to date format
+
 mergedCases$Date<-as.Date(mergedCases$Date,"%m/%d/%y")
 
-p<-mergedCases %>% group_by(Date) %>% summarise_at(c("Confirmed","Recovered","Death"),sum)%>% ggplot(aes(x=Date)) + geom_line(aes(y=Confirmed, color="Confirmed")) + 
-  geom_line(aes(y=Death, color="Deaths")) + 
-  geom_line(aes(y=Recovered, color="Recovered")) +
-  geom_point(size = 2) + 
-  geom_text(aes(x = 31.1, label = y ), hjust = 0) + 
-  transition_reveal(Date) + 
-  coord_cartesian(clip = 'off') + 
-  xlab("Day") +
-  ylab("Number of cases") + ggtitle("Evolution of cases over time") +
-  theme_classic()
-file_renderer(dir = ".", prefix = "gganim_plot", overwrite = TRUE)
-animate(p, fps=10,renderer = gifski_renderer("virusevolution.gif"))
-
+# summarize cases by date
 df1<-mergedCases %>% group_by(Date) %>% summarise_at(c("Confirmed","Recovered","Death"),sum)
+
+# stack columns together and add state columns to each case
 df2 <- data.frame(Date=rep(df1$Date, 3), 
                   act_noact=c(df1$Confirmed, df1$Death,df1$Recovered), 
                   State=rep(c("Confirmed","Deaths", "Recovered"), each=nrow(df1)))
 
-
+# retrieve last update date for title
 lastDate<-max(df1$Date)
+
+# define plot object
 p <- ggplot(df2, aes(x=Date, y=act_noact, group=State, color=State)) +
   geom_line() +
   geom_segment(aes(xend=max(Date), yend = act_noact), linetype=2, colour='blue') +
@@ -87,4 +79,5 @@ p <- ggplot(df2, aes(x=Date, y=act_noact, group=State, color=State)) +
   axis.line = element_line(colour = "black"),
   plot.margin = margin(5.5, 40, 5.5, 5.5))
 
+# create animation gif file
 animate(p, fps=5,renderer = gifski_renderer("virusevolution.gif"))
