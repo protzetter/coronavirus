@@ -5,6 +5,7 @@
 library(gganimate)
 library(dplyr)
 library(tidyverse)
+library(reshape2)
 library(ggthemes)
 library(gifski)
 library(av)
@@ -69,7 +70,7 @@ p <- ggplot(df2, aes(x=Date, y=act_noact, group=State, color=State)) +
   view_follow(fixed_y = TRUE)+
   coord_cartesian(clip = 'off') + 
   xlab("Day") +
-  ylab("Number of cases") + ggtitle(paste("Evolution of cumulated cases over time as of ",lastDate)) +
+  ylab("Number of cumulated cases") + ggtitle(paste("Evolution of cumulated cases over time as of ",lastDate)) +
   enter_drift(x_mod = -1) + exit_drift(x_mod = 1) +
   theme_classic() +
   theme(legend.position = c(0.2, 0.8))+
