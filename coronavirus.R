@@ -7,6 +7,7 @@ library(dplyr)
 library(tidyverse)
 library(ggthemes)
 library(gifski)
+library(av)
 
 
 
@@ -80,3 +81,6 @@ p <- ggplot(df2, aes(x=Date, y=act_noact, group=State, color=State)) +
 
 # create animation gif file
 animate(p, fps=5,renderer = gifski_renderer("virusevolution.gif"))
+
+#crteate mp4 file
+animate(p, fps=5,renderer=av_renderer('virusevolution.mp4'))
