@@ -52,25 +52,31 @@ mergedCases$Date<-as.Date(mergedCases$Date,"%m/%d/%y")
 # summarize cases by date
 df1<-mergedCases %>% group_by(Date) %>% summarise_at(c("Confirmed","Recovered","Death"),sum)
 
+dff<-as.data.frame(rbind( c(0,0,0),apply(df1[-1] , 2 , diff )))
+colnames(dff)<-c("New","New recovered","New Death")
+
+df1<-cbind(df1,dff)
+
 # stack columns together and add state columns to each case
-df2 <- data.frame(Date=rep(df1$Date, 3), 
-                  act_noact=c(df1$Confirmed, df1$Death,df1$Recovered), 
-                  State=rep(c("Confirmed","Deaths", "Recovered"), each=nrow(df1)))
+df2 <- data.frame(Date=rep(df1$Date, 4), 
+                  cases=c(df1$Confirmed, df1$Death,df1$Recovered,df1$New), 
+                  State=rep(c("Confirmed","Deaths", "Recovered",' New cases'), each=nrow(df1)))
+
 
 # retrieve last update date for title
 lastDate<-max(df1$Date)
 
 # define plot object
-p <- ggplot(df2, aes(x=Date, y=act_noact, group=State, color=State)) +
+p <- ggplot(df2, aes(x=Date, y=cases, group=State, color=State)) +
   geom_line() +
-  geom_segment(aes(xend=max(Date), yend = act_noact), linetype=2, colour='blue') +
+  geom_segment(aes(xend=max(Date), yend = cases), linetype=2, colour='blue') +
   geom_point(size = 3) + 
-  geom_text(aes(x = max(Date)+.1, label = sprintf("%5.0f", act_noact)), hjust=-0.5) +
+  geom_text(aes(x = max(Date)+.1, label = sprintf("%5.0f", cases)), hjust=-0.5) +
   transition_reveal(Date) + 
   view_follow(fixed_y = TRUE)+
   coord_cartesian(clip = 'off') + 
   xlab("Day") +
-  ylab("Number of cumulated cases") + ggtitle(paste("Evolution of cumulated cases over time as of ",lastDate)) +
+  ylab("Number of cumulative cases") + ggtitle(paste("Evolution of cumulative cases over time as of ",lastDate)) +
   enter_drift(x_mod = -1) + exit_drift(x_mod = 1) +
   theme_classic() +
   theme(legend.position = c(0.2, 0.8))+
@@ -83,5 +89,5 @@ p <- ggplot(df2, aes(x=Date, y=act_noact, group=State, color=State)) +
 # create animation gif file
 animate(p, fps=5,renderer = gifski_renderer("virusevolution.gif"))
 
-#crteate mp4 file
+#create mp4 file
 animate(p, fps=5,renderer=av_renderer('virusevolution.mp4'))
