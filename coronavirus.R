@@ -5,10 +5,9 @@
 library(gganimate)
 library(dplyr)
 library(tidyverse)
-library(reshape2)
 library(ggthemes)
 library(gifski)
-library(av)
+
 
 
 # load data from Johns Hopkins github
