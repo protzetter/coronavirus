@@ -58,16 +58,16 @@ colnames(dff)<-c("New","New recovered","New Death")
 df1<-cbind(df1,dff)
 
 # stack columns together and add state columns to each case
-df2 <- data.frame(Date=rep(df1$Date, 4), 
-                  cases=c(df1$Confirmed, df1$Death,df1$Recovered,df1$New), 
-                  State=rep(c("Confirmed","Deaths", "Recovered",' New cases'), each=nrow(df1)))
+df2 <- data.frame(Date=rep(df1$Date, 3), 
+                  cases=c(df1$Confirmed, df1$Death,df1$Recovered), 
+                  State=rep(c("Confirmed","Deaths", "Recovered"), each=nrow(df1)))
 
 
 # retrieve last update date for title
 lastDate<-max(df1$Date)
 
 # define plot object
-p <- ggplot(df2, aes(x=Date, y=cases, group=State, color=State)) +
+p<-ggplot(df2, aes(x=Date, y=cases, group=State, color=State)) +
   geom_line() +
   geom_segment(aes(xend=max(Date), yend = cases), linetype=2, colour='blue') +
   geom_point(size = 3) + 
@@ -87,7 +87,7 @@ p <- ggplot(df2, aes(x=Date, y=cases, group=State, color=State)) +
   plot.margin = margin(5.5, 40, 5.5, 5.5))
 
 # create animation gif file
-animate(p, fps=5,renderer = gifski_renderer("virusevolution.gif"))
+animate(p, fps=5,renderer = gifski_renderer("virusevolution.gif"), end_pause = 10)
 
 #create mp4 file
 animate(p, fps=5,renderer=av_renderer('virusevolution.mp4'))

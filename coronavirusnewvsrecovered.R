@@ -90,4 +90,4 @@ p<-ggplot(df2, aes(x=Date, y=cases, group=State, color=State)) +
 animate(p, fps=5,renderer = gifski_renderer("virusevolutiondaily.gif"), end_pause=10)
 
 #create mp4 file
-animate(p, fps=5,renderer=av_renderer('virusevolution.mp4'))
+animate(p, fps=5,renderer=av_renderer('virusevolutiondaily.mp4'),  end_pause = 10)
