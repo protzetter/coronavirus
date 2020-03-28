@@ -14,9 +14,12 @@ library(av)
 
 # load data from Johns Hopkins github
 
-confirmedCases= read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')
-deathCases= read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv')
-recoveredCases= read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv')
+# load data from Johns Hopkins github
+
+confirmedCases= read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv')
+deathCases= read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv')
+recoveredCases= read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv')
+
 
 
 # set system locale for date conversion purpose
@@ -58,9 +61,9 @@ colnames(dff)<-c("New","New recovered","New Death")
 df1<-cbind(df1,dff)
 
 # stack columns together and add state columns to each case
-df2 <- data.frame(Date=rep(df1$Date, 3), 
-                  cases=c(df1$Confirmed, df1$Death,df1$Recovered), 
-                  State=rep(c("Confirmed","Deaths", "Recovered"), each=nrow(df1)))
+df2 <- data.frame(Date=rep(df1$Date, 4), 
+                  cases=c(df1$Confirmed, df1$Death,df1$Recovered, df1$New), 
+                  State=rep(c("Confirmed","Deaths", "Recovered", "New"), each=nrow(df1)))
 
 
 # retrieve last update date for title
